@@ -15,7 +15,6 @@ This file is part of creepy.
 
     You should have received a copy of the GNU General Public License
     along with creepy  If not, see <http://www.gnu.org/licenses/>.
-
 '''
 
 
@@ -33,12 +32,12 @@ from time import  mktime
 from urlparse import urlparse
 from BeautifulSoup import BeautifulSoup as bs
 
+
 try:
     from gi.repository import GExiv2
 except ImportError:
-    GEXIV_AVAILABLE = False
-else:
-    GEXIV_AVAILABLE = True
+    GExiv2 = False
+
 
 class URLAnalyzer():
     """
@@ -54,7 +53,6 @@ class URLAnalyzer():
 
     def default_action(self, url, tweet):
         return []
-
 
     def fsq(self, url, tweet):
         """
@@ -83,10 +81,10 @@ class URLAnalyzer():
 
     def gowalla(self, url, tweet):
         """
-                Handles  gowalla links
+        Handles  gowalla links
 
-                returns location coordinates
-                """
+        returns location coordinates
+        """
         try:
             data = {}
             full_url = urllib.urlopen(url.geturl()).url
@@ -105,15 +103,13 @@ class URLAnalyzer():
             self.errors.append({'from':'gowalla', 'tweetid':tweet.id, 'url':url.geturl(), 'error':err})
             return []
 
-
     def exif_extract(self, temp_file, tweet):
         """
         Attempt to extract exif information from the provided tweet.
         If gexiv2 dependency is not installed, this will not work and will
         merely return an empty list
         """
-
-        if not GEXIV_AVAILABLE:
+        if not GExiv2:
             return []
 
         try:
@@ -138,9 +134,6 @@ class URLAnalyzer():
             err = 'Error extracting gps coordinates from exif metadata'
             self.errors.append({'from':'exif', 'tweetid':0, 'url':'', 'error':err})
 
-
-
-
     def tp(self, url, tweet):
         '''
         api_location = {}
@@ -153,8 +146,6 @@ class URLAnalyzer():
         except simplejson.JSONDecodeError:
             #print "error produced by http://api.twitpic.com/2/media/show.json?id="+url.path[1:]
         '''
-
-
         try:
             #Handle some bad HTML in twitpic
             html = urllib.urlopen(url.geturl()).read()
@@ -170,10 +161,7 @@ class URLAnalyzer():
             self.errors.append({'from':'twitpic', 'tweetid':tweet.id, 'url': url.geturl(), 'error':err})
             return []
 
-
-
     def yfrog(self, url, tweet):
-
         try:
             ip = bs(urllib.urlopen("http://yfrog.com/api/xmlInfo?path="+url.path[1:])).find('ip')
             if ip:
@@ -324,6 +312,7 @@ class URLAnalyzer():
             err = 'Error trying to download photo'
             self.errors.append({'from':'twitgoo', 'tweetid':tweet.id, 'url': url.geturl() ,'error':err})
             return []
+
     def instagram(self, url, tweet):
         '''
         Handles  instagram links
